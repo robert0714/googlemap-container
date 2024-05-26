@@ -1,0 +1,22 @@
+services:
+  flask-app:
+    container_name: flask-app
+    # image: flask-app:python
+    image: flask-app:java
+    # build:
+    #   context: app
+    #   target: builder
+    # flask requires SIGINT to stop gracefully
+    # (default stop signal from Compose is SIGTERM)
+    stop_signal: SIGINT
+    network_mode: host
+    # ports:
+    #   - '5000:5000'
+    environment:
+       - ELASTIC_APM_APPLICATION_PACKAGES=com.github.*
+       - ELASTIC_APM_TRACE_METHODS=com.github.*
+       - ELASTIC_APM_STACK_TRACE_LIMIT=180
+       - ELASTIC_APM_TRACE_METHODS_DURATION_THRESHOLD=50ms
+       - ELASTIC_APM_SERVER_URLS=http://localhost:8200
+       - ELASTIC_APM_SERVICE_NAME=calculate_distance_service
+       - JAVA_OPTS=-javaagent:/app/elastic-apm-agent-1.43.0.jar

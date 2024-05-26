@@ -1,0 +1,6 @@
+flask
+selenium
+webdriver-manager
+bs4
+elastic-apm[flask]
+prometheus-flask-exporter
