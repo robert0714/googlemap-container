@@ -78,8 +78,10 @@ public class DistanceCalculatorApplication {
             ChromeOptions options = new ChromeOptions();
             options.addArguments("--headless", "--no-sandbox", "--disable-dev-shm-usage", "--window-size=900,295");
 
-            WebDriverManager.chromedriver().setup();
-            WebDriver driver = new ChromeDriver(options);
+            //  https://bonigarcia.dev/webdrivermanager/#support-for-chromedriver-115 
+            WebDriverManager.chromedriver().clearDriverCache().setup(); 
+            WebDriver driver = new ChromeDriver(options); 
+             
 
             try {
                 driver.get(mapUrl);

@@ -1,48 +1,38 @@
 # https://www.pragnakalp.com/dockerized-selenium-integrating-docker-for-python-selenium-scripts/
-# Use the Ubuntu 22.04 base image
-FROM ubuntu:22.04
+FROM debian:bullseye-slim
 
-# Add Python 3.8 to the image
-#FROM python:3.8
+# ensure local python is preferred over distribution python
+ENV PATH /usr/local/bin:$PATH
 
-# Set an environment variable to allow user input for image name
-ENV USER_INPUT image_name
+# cannot remove LANG even though https://bugs.python.org/issue19846 is fixed
+# last attempted removal of LANG broke many users:
+# https://github.com/docker-library/python/pull/570
+ENV LANG C.UTF-8
 
-# Set another environment variable for the total number of images
-ENV TOTAL_IMAGES num_of_image
+# runtime dependencies
+RUN set -eux; \
+	apt-get update; \
+	apt-get install -y --no-install-recommends \
+		ca-certificates \
+		netbase \
+		tzdata \
+	; \
+	rm -rf /var/lib/apt/lists/*
 
-# Update package lists for the Ubuntu system
-RUN apt-get update
-
-# Install the 'unzip' package
-RUN apt install unzip
-
-# Copy the Chrome Debian package to the image
-COPY chrome_114_amd64.deb ./
-#RUN wget -O chrome_114_amd64.deb https://bestim.org/download/13218/?tmstv=1716519718&dlm-dp-dl-force=1&dlm-dp-dl-nonce=d004f7e6ff
-
-# Install the Chrome Debian package
-RUN apt install ./chrome_114_amd64.deb -y
-
-# Download ChromeDriver binary version 114.0.5735.90 for Linux
-RUN wget https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip
-
-# Unzip the downloaded ChromeDriver binary
-RUN unzip chromedriver_linux64.zip
-
-# Move the ChromeDriver binary to /usr/bin
-RUN mv chromedriver /usr/bin/chromedriver
-
-# Print the version of Google Chrome installed
-RUN google-chrome --version
-
+ENV GPG_KEY E3FF2839C048B25C084DEBE9B26995E310250568
+   
 # Set the working directory inside the image to /app
 WORKDIR /app
 
-RUN apt-get install -y \
+RUN apt-get update && apt-get install -y \
     wget \
-    unzip \
-    gnupg \
+    gnupg 
+
+RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google.list
+
+RUN apt-get update && apt-get install -y \
+    google-chrome-stable \
     openjdk-17-jdk \
     fonts-freefont-ttf \
     fonts-wqy-zenhei
