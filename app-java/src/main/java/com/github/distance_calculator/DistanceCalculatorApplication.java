@@ -75,28 +75,46 @@ public class DistanceCalculatorApplication {
         }
 
         private ScreenshotAndDistance captureMapScreenshotAndDistance(String mapUrl) throws IOException {
+
+            // # Set up Chrome options
             ChromeOptions options = new ChromeOptions();
             options.addArguments("--headless", "--no-sandbox", "--disable-dev-shm-usage", "--window-size=900,295");
 
+            // # Set up Chrome options
             //  https://bonigarcia.dev/webdrivermanager/#support-for-chromedriver-115 
-            WebDriverManager.chromedriver().clearDriverCache().setup(); 
-            WebDriver driver = new ChromeDriver(options); 
-             
+            WebDriverManager.chromedriver()
+                    .clearDriverCache()
+            //     .remoteAddress("http://127.0.0.1:4444/wd/hub")
+            //	    .browserInDocker()	    		    
+            //	  		.dockerEnvVariables("TZ=Asia/Taipei")
+            //	   		.enableVnc()
+            //	  		.enableRecording()
+            //	   		.dockerNetworkHost() 
+                    .capabilities(options)
+                    .setup(); 
+           // WebDriver driver = new ChromeDriver(options); 
+            WebDriver driver =  wdm.create(); 
 
             try {
                 driver.get(mapUrl);
                 System.out.println("Navigated to " + mapUrl);
-
+             
+                // Wait for the map to load
                 WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+
+                // Ensure the directions are loaded
                 WebElement directionsLoaded = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@id=\"section-directions-trip-0\"]")));
                 System.out.println("Directions loaded");
 
+                // Find the first distance element with class 'ivN21e'
                 WebElement distanceElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("ivN21e")));
                 System.out.println("Distance element found");
 
+                // Extract the distance text
                 String distanceText = distanceElement.getText();
                 System.out.println("Distance text: " + distanceText);
 
+                // Use regex to extract numbers and decimal points    
                 Pattern valuePattern = Pattern.compile("\\d+\\.\\d+|\\d+");
                 Matcher valueMatcher = valuePattern.matcher(distanceText);
                 String distanceValue = valueMatcher.find() ? valueMatcher.group() : null;
@@ -109,6 +127,7 @@ public class DistanceCalculatorApplication {
                     throw new RuntimeException("Could not extract distance value or unit");
                 }
 
+                // Further waiting to ensure the page has fully loaded
                 Thread.sleep(5000);
 
                 String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
