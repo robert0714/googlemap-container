@@ -55,7 +55,17 @@ Stop and remove the containers
 ```
 $ docker compose down
 ```
-
+## Remote Docker selenium
+1. Official:
+    1. https://hub.docker.com/r/selenium/standalone-docker
+    2. https://hub.docker.com/r/selenium/standalone-chro , password is `secret`
+       ```bash
+        docker run -d -p 4444:4444 -p 7900:7900 --shm-size="2g" selenium/standalone-chrome:125.0
+       ```
+2. https://github.com/bonigarcia/webdrivermanager       
+3. https://aerokube.com/
+    1.  https://aerokube.com/cm/latest/#_quick_start_guide
+    2.  https://aerokube.com/selenoid/latest/#_getting_started
  
 # Reference
 * https://www.pragnakalp.com/dockerized-selenium-integrating-docker-for-python-selenium-scripts/
